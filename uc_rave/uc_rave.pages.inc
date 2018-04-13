@@ -19,16 +19,17 @@ function uc_rave_complete($cart_id = 0) {
       $apiLink = $stagingUrl;
 
       $env = variable_get('uc_rave_env', 'staging');
-      
+      $secretKey = variable_get('uc_rave_test_secretkey', '');
       if ($env == 'live') {
         $apiLink = $liveUrl;
+        $secretKey = variable_get('uc_rave_live_secretkey', '');
       }
 
       $requeryCount++;
 
       $data = array(
         'txref' => $_GET['txref'],
-        'SECKEY' => variable_get('uc_rave_secretkey', ''),
+        'SECKEY' => $secretKey,
         'last_attempt' => '1'
         // 'only_successful' => '1'
       );

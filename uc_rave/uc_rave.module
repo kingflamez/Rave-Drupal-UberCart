@@ -51,17 +51,29 @@ function uc_rave_method($op, &$order) {
           'staging' => t('Staging')
         )
       );
-      $form['uc_rave_publickey'] = array(
+      $form['uc_rave_live_publickey'] = array(
         '#type' => 'textfield',
-        '#title' => t('Public Key'),
-        '#description' => t('Public Key'),
-        '#default_value' => variable_get('uc_rave_publickey'),
+        '#title' => t('Live Public Key'),
+        '#description' => t('Live Public Key'),
+        '#default_value' => variable_get('uc_rave_live_publickey'),
       );
-      $form['uc_rave_secretkey'] = array(
+      $form['uc_rave_live_secretkey'] = array(
         '#type' => 'textfield',
-        '#title' => t('Secret Key'),
-        '#description' => t('Secret Key'),
-        '#default_value' => variable_get('uc_rave_secretkey'),
+        '#title' => t('Live Secret Key'),
+        '#description' => t('Live Secret Key'),
+        '#default_value' => variable_get('uc_rave_live_secretkey'),
+      );
+      $form['uc_rave_test_publickey'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Test Public Key'),
+        '#description' => t('Test Public Key'),
+        '#default_value' => variable_get('uc_rave_test_publickey'),
+      );
+      $form['uc_rave_test_secretkey'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Test Secret Key'),
+        '#description' => t('Test Secret Key'),
+        '#default_value' => variable_get('uc_rave_test_secretkey'),
       );
       $form['uc_rave_logo'] = array(
         '#type' => 'textfield',
@@ -188,14 +200,16 @@ function uc_rave_form($form, &$form_state, $order) {
 
   if ($env == 'staging') {
     $baseUrl = 'https://rave-api-v2.herokuapp.com';
+    $secretkey = variable_get('uc_rave_test_secretkey', '');
+    $publickey = variable_get('uc_rave_test_publickey', '');
   } else {
     $baseUrl = 'https://api.ravepay.co';
+    $secretkey = variable_get('uc_rave_live_secretkey', '');
+    $publickey = variable_get('uc_rave_live_publickey', '');
   }
 
-  $secretkey = variable_get('uc_rave_secretkey', '');
-
   $postfields = array();
-  $postfields['PBFPubKey'] = variable_get('uc_rave_publickey', '');
+  $postfields['PBFPubKey'] = $publickey;
   $postfields['customer_email'] = $order->primary_email;
   $postfields['customer_firstname'] = $order->billing_first_name;
   $postfields['customer_lastname'] = $order->billing_last_name;
