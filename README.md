@@ -11,7 +11,9 @@ Allows you to use drupal Uber-Cart with flutterwave's Rave. Accept Payments worl
 ## Requirements
 1. Drupal installation
 2. Drupal Uber Cart Module
-2. A [rave account](https://rave.flutterwave.com)
+3. A [rave account](https://rave.flutterwave.com)
+
+> A [test rave account](https://ravesandboxapi.flutterwave.com/)
 
 ## Installation
 

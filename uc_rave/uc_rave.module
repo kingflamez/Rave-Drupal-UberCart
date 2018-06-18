@@ -199,7 +199,7 @@ function uc_rave_form($form, &$form_state, $order) {
   $env = variable_get('uc_rave_env', '');
 
   if ($env == 'staging') {
-    $baseUrl = 'https://rave-api-v2.herokuapp.com';
+    $baseUrl = 'https://ravesandboxapi.flutterwave.com';
     $secretkey = variable_get('uc_rave_test_secretkey', '');
     $publickey = variable_get('uc_rave_test_publickey', '');
   } else {

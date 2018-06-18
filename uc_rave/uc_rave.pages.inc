@@ -14,7 +14,7 @@ function uc_rave_complete($cart_id = 0) {
 
 
     function requery($requeryCount){
-      $stagingUrl = 'http://flw-pms-dev.eu-west-1.elasticbeanstalk.com/';
+      $stagingUrl = 'https://ravesandboxapi.flutterwave.com/';
       $liveUrl = 'https://api.ravepay.co/';
       $apiLink = $stagingUrl;
 
@@ -36,7 +36,7 @@ function uc_rave_complete($cart_id = 0) {
     // make request to endpoint.
       $data_string = json_encode($data);
       $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL, $apiLink . 'flwv3-pug/getpaidx/api/xrequery');
+      curl_setopt($ch, CURLOPT_URL, $apiLink . 'flwv3-pug/getpaidx/api/v2/verify');
       curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
       curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
