@@ -77,20 +77,39 @@ function uc_rave_method($op, &$order) {
       );
       $form['uc_rave_logo'] = array(
         '#type' => 'textfield',
-        '#title' => t('Logo'),
-        '#description' => t('Logo'),
+        '#title' => t('Modal Logo'),
+        '#description' => t('Logo url'),
         '#default_value' => variable_get('uc_rave_logo'),
       );
-      $form['uc_rave_country'] = array(
-        '#type' => 'select',
-        '#title' => t('Country'),
-        '#options' => array(
-          'NG' => t('Nigeria'),
-          'GH' => t('Ghana'),
-          'KE' => t('Kenya'),
-          'ZA' => t('South Africa')
-        ),
-        '#default_value' => variable_get('uc_rave_country', ''),
+      $form['uc_rave_title'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Modal Title'),
+        '#description' => t('Modal Title'),
+        '#default_value' => variable_get('uc_rave_title'),
+      );
+      $form['uc_rave_desc'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Modal Description'),
+        '#description' => t('Modal Description'),
+        '#default_value' => variable_get('uc_rave_desc'),
+      );
+      $form['uc_rave_paymentplan'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Payment Plan ID (optional)'),
+        '#description' => t('Payment Plan ID'),
+        '#default_value' => variable_get('uc_rave_paymentplan'),
+      );
+      $form['uc_rave_metaname'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Meta Name (optional)'),
+        '#description' => t('Meta Name'),
+        '#default_value' => variable_get('uc_rave_metaname'),
+      );
+      $form['uc_rave_metavalue'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Meta Value (optional)'),
+        '#description' => t('Meta Value'),
+        '#default_value' => variable_get('uc_rave_metavalue'),
       );
       $form['uc_rave_currency_code'] = array(
         '#type' => 'select',
@@ -102,7 +121,9 @@ function uc_rave_method($op, &$order) {
           'EUR' => t('EUR'),
           'GBP' => t('GBP'),
           'GHS' => t('GHS'),
-          'ZAR' => t('ZAR')
+          'ZAR' => t('ZAR'),
+          'UGX' => t('UGX'),
+          'TZX' => t('TZX')
         ),
         '#default_value' => variable_get('uc_rave_currency_code', ''),
       );
@@ -208,19 +229,41 @@ function uc_rave_form($form, &$form_state, $order) {
     $publickey = variable_get('uc_rave_live_publickey', '');
   }
 
+  switch (variable_get('uc_rave_currency_code')) {
+    case 'KES':
+        $country = 'KE';
+        break;
+    case 'GHS':
+        $country = 'GH';
+        break;
+    case 'ZAR':
+        $country = 'ZA';
+        break;
+    
+    default:
+        $country = 'NG';
+        break;
+  }
+  
+
+  $metaData = array(['metaname' => variable_get('uc_rave_metaname', ''), 'metavalue' => variable_get('uc_rave_metavalue', '')]);
+  
   $postfields = array();
   $postfields['PBFPubKey'] = $publickey;
   $postfields['customer_email'] = $order->primary_email;
   $postfields['customer_firstname'] = $order->billing_first_name;
   $postfields['customer_lastname'] = $order->billing_last_name;
-  $postfields['country'] = variable_get('uc_rave_country', '');
+  $postfields['country'] = $country;
   $postfields['custom_logo'] = variable_get('uc_rave_logo', '');
+  $postfields['custom_title'] = variable_get('uc_rave_title', '');
+  $postfields['custom_description'] = variable_get('uc_rave_desc', '');
   $postfields['redirect_url'] = $redirectURL;
   $postfields['txref'] = $rtxref;
   $postfields['payment_method'] = variable_get('uc_rave_payment_method', '');
   $postfields['amount'] = $order->order_total + 0;
   $postfields['currency'] = variable_get('uc_rave_currency_code', 'NGN');
   $postfields['hosted_payment'] = 1;
+  $postfields['payment_plan'] = variable_get('uc_rave_paymentplan', '');
   ksort($postfields);
   $stringToHash = "";
   foreach ($postfields as $key => $val) {
@@ -228,7 +271,7 @@ function uc_rave_form($form, &$form_state, $order) {
   }
   $stringToHash .= $secretkey;
   $hashedValue = hash('sha256', $stringToHash);
-  $transactionData = array_merge($postfields, array('integrity_hash' => $hashedValue));
+  $transactionData = array_merge($postfields, array('integrity_hash' => $hashedValue), array('meta' => $metaData));
   $json = json_encode($transactionData);
   $form['some_text'] = array(
     '#markup' => "
@@ -238,7 +281,7 @@ function uc_rave_form($form, &$form_state, $order) {
     <script type='text/javascript' src='" . $baseUrl . "/flwv3-pug/getpaidx/api/flwpbf-inline.js'></script>
     <script>
     function pay() {
-    var data = JSON.parse('" . json_encode($transactionData = array_merge($postfields, array('integrity_hash' => $hashedValue))) . "');
+    var data = JSON.parse('" . json_encode($transactionData = array_merge($postfields, array('integrity_hash' => $hashedValue), array('meta' => $metaData))) . "');
     getpaidSetup(data);}
     </script>
         ");
