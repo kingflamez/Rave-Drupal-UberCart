@@ -87,18 +87,6 @@ function uc_rave_method($op, &$order) {
         '#description' => t('Modal Title'),
         '#default_value' => variable_get('uc_rave_title'),
       );
-      $form['uc_rave_desc'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Modal Description'),
-        '#description' => t('Modal Description'),
-        '#default_value' => variable_get('uc_rave_desc'),
-      );
-      $form['uc_rave_paymentplan'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Payment Plan ID (optional)'),
-        '#description' => t('Payment Plan ID'),
-        '#default_value' => variable_get('uc_rave_paymentplan'),
-      );
       $form['uc_rave_metaname'] = array(
         '#type' => 'textfield',
         '#title' => t('Meta Name (optional)'),
@@ -123,20 +111,12 @@ function uc_rave_method($op, &$order) {
           'GHS' => t('GHS'),
           'ZAR' => t('ZAR'),
           'UGX' => t('UGX'),
-          'TZX' => t('TZX')
+          'TZS' => t('TZS'),
+	  'RWF' => t('RWF'),
+	  'XOF' => t('XOF'),
+	  'SLL' => t('SLL')
         ),
         '#default_value' => variable_get('uc_rave_currency_code', ''),
-      );
-      $form['uc_rave_payment_method'] = array(
-        '#type' => 'select',
-        '#title' => t('Payment Method'),
-        '#options' => array(
-          'both' => t('All'),
-          'cards' => t('Cards'),
-          'account' => t('Bank Accounts'),
-          'ussd' => t('USSD')
-        ),
-        '#default_value' => variable_get('uc_rave_payment_method', ''),
       );
       return $form;
   }
@@ -218,13 +198,15 @@ function uc_rave_form($form, &$form_state, $order) {
 
   $rtxref = getRavetxref($order_id,$order->primary_email);
   $env = variable_get('uc_rave_env', '');
+  
+  $baseUrl = 'https://api.ravepay.co';
 
   if ($env == 'staging') {
-    $baseUrl = 'https://ravesandboxapi.flutterwave.com';
+    
     $secretkey = variable_get('uc_rave_test_secretkey', '');
     $publickey = variable_get('uc_rave_test_publickey', '');
   } else {
-    $baseUrl = 'https://api.ravepay.co';
+    
     $secretkey = variable_get('uc_rave_live_secretkey', '');
     $publickey = variable_get('uc_rave_live_publickey', '');
   }
@@ -238,6 +220,9 @@ function uc_rave_form($form, &$form_state, $order) {
         break;
     case 'ZAR':
         $country = 'ZA';
+        break;
+    case 'TZS':
+        $country = 'TZ';
         break;
     
     default:
@@ -256,14 +241,11 @@ function uc_rave_form($form, &$form_state, $order) {
   $postfields['country'] = $country;
   $postfields['custom_logo'] = variable_get('uc_rave_logo', '');
   $postfields['custom_title'] = variable_get('uc_rave_title', '');
-  $postfields['custom_description'] = variable_get('uc_rave_desc', '');
   $postfields['redirect_url'] = $redirectURL;
   $postfields['txref'] = $rtxref;
-  $postfields['payment_method'] = variable_get('uc_rave_payment_method', '');
   $postfields['amount'] = $order->order_total + 0;
   $postfields['currency'] = variable_get('uc_rave_currency_code', 'NGN');
   $postfields['hosted_payment'] = 1;
-  $postfields['payment_plan'] = variable_get('uc_rave_paymentplan', '');
   ksort($postfields);
   $stringToHash = "";
   foreach ($postfields as $key => $val) {
